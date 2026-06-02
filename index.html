@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CCISC Event Planner AY 2026-2027</title>
+    <link rel="icon" href="assets/ccisc-logo.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="brand">
+        <img src="assets/ccisc-logo.png" alt="ISAT U CCISC logo" class="brand-logo">
+        <div>
+          <p class="eyebrow">ISAT U - College of Computing and Informatics Student Council</p>
+          <h1>Event Planner AY 2026-2027</h1>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="ghost-button" id="printButton" type="button" title="Print calendar">Print</button>
+        <button class="ghost-button" id="exportButton" type="button" title="Export planner data">Export</button>
+        <label class="ghost-button file-button" title="Import planner data">
+          Import
+          <input id="importInput" type="file" accept="application/json">
+        </label>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <section class="calendar-panel" aria-label="Year round calendar">
+        <div class="calendar-heading">
+          <div>
+            <p class="eyebrow">Academic year workspace</p>
+            <h2 id="calendarTitle">Calendar Overview</h2>
+          </div>
+          <div class="jump-control">
+            <label for="jumpDateInput">Jump to date</label>
+            <input id="jumpDateInput" type="date" min="2026-06-01" max="2027-07-31">
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="month-controls">
+            <button class="icon-button" id="prevMonth" type="button" aria-label="Previous month">&lt;</button>
+            <select id="monthSelect" aria-label="Select month"></select>
+            <button class="icon-button" id="nextMonth" type="button" aria-label="Next month">&gt;</button>
+          </div>
+          <div class="filters" aria-label="Event filters">
+            <input id="searchInput" type="search" placeholder="Search events">
+            <select id="typeFilter" aria-label="Filter by event type">
+              <option value="all">All events</option>
+              <option value="academic">Academic calendar</option>
+              <option value="college">CCI college events</option>
+              <option value="council">Council events</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="stats-strip" aria-label="Calendar summary">
+          <div>
+            <strong id="academicCount">0</strong>
+            <span>academic defaults</span>
+          </div>
+          <div>
+            <strong id="collegeCount">0</strong>
+            <span>CCI college events</span>
+          </div>
+          <div>
+            <strong id="councilCount">0</strong>
+            <span>council events saved</span>
+          </div>
+          <div>
+            <strong id="monthCount">0</strong>
+            <span>events this month</span>
+          </div>
+          <div>
+            <strong id="taskCount">0</strong>
+            <span>open planner tasks</span>
+          </div>
+        </div>
+
+        <div class="legend" aria-label="Legend">
+          <span><i class="dot academic"></i> Academic calendar</span>
+          <span><i class="dot college"></i> CCI college event</span>
+          <span><i class="dot council"></i> Council event</span>
+          <span><i class="dot deadline"></i> Deadline/exam</span>
+        </div>
+
+        <div class="calendar-grid" id="calendarGrid" aria-live="polite"></div>
+
+        <section class="planner-notes" aria-label="Monthly planner notes">
+          <div class="notes-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Month notes</p>
+                <h2 id="notesTitle">Planning Notes</h2>
+              </div>
+              <span class="save-indicator" id="notesSavedLabel">Saved locally</span>
+            </div>
+            <textarea id="monthNotesInput" rows="7" placeholder="Budget reminders, program flow, coordination notes, permit status, suppliers, risk items..."></textarea>
+          </div>
+
+          <div class="tasks-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Action list</p>
+                <h2>Planner Tasks</h2>
+              </div>
+              <button class="ghost-button compact-button" id="clearCompletedTasks" type="button">Clear Done</button>
+            </div>
+            <form id="taskForm" class="task-form">
+              <input id="taskInput" maxlength="120" placeholder="Add an action item for this month">
+              <button class="primary-button compact-button" type="submit">Add</button>
+            </form>
+            <div id="taskList" class="task-list empty-state">No planner tasks for this month yet.</div>
+          </div>
+        </section>
+      </section>
+
+      <aside class="side-panel" aria-label="Event details and council event form">
+        <section class="selected-day">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Selected date</p>
+              <h2 id="selectedDateLabel">Select a date</h2>
+            </div>
+            <div class="selected-actions">
+              <button class="primary-button compact-button" id="addSelectedDateButton" type="button">Add Event</button>
+              <button class="ghost-button compact-button" id="todayButton" type="button">Today</button>
+            </div>
+          </div>
+          <div id="selectedEvents" class="event-list empty-state">Choose a date to view its events.</div>
+        </section>
+
+        <section class="form-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Council planning</p>
+              <h2 id="formTitle">Add Council Event</h2>
+            </div>
+            <div class="form-heading-actions">
+              <span class="save-indicator" id="eventSavedLabel">Events save locally</span>
+              <button class="ghost-button" id="clearForm" type="button">Clear</button>
+            </div>
+          </div>
+
+          <form id="eventForm" class="event-form">
+            <input type="hidden" id="eventId">
+
+            <label>
+              Event title
+              <input id="titleInput" name="title" required maxlength="120" placeholder="e.g. CCISC General Assembly">
+            </label>
+
+            <div class="form-row">
+              <label>
+                Start date
+                <input id="startDateInput" name="startDate" type="date" required>
+              </label>
+              <label>
+                End date
+                <input id="endDateInput" name="endDate" type="date">
+              </label>
+            </div>
+
+            <div class="form-row">
+              <label>
+                Start time
+                <input id="startTimeInput" name="startTime" type="time">
+              </label>
+              <label>
+                End time
+                <input id="endTimeInput" name="endTime" type="time">
+              </label>
+            </div>
+
+            <label>
+              Venue
+              <input id="venueInput" name="venue" required maxlength="120" placeholder="e.g. CCI AVR">
+            </label>
+
+            <div class="form-row">
+              <label>
+                Organizer
+                <input id="organizerInput" name="organizer" maxlength="100" placeholder="CCISC">
+              </label>
+              <label>
+                Audience
+                <input id="audienceInput" name="audience" maxlength="120" placeholder="CCI students">
+              </label>
+            </div>
+
+            <div class="form-row">
+              <label>
+                Category
+                <select id="categoryInput" name="category">
+                  <option>Council Activity</option>
+                  <option>Meeting</option>
+                  <option>Program</option>
+                  <option>Deadline</option>
+                  <option>Academic Support</option>
+                </select>
+              </label>
+              <label>
+                Status
+                <select id="statusInput" name="status">
+                  <option>Planned</option>
+                  <option>Confirmed</option>
+                  <option>Needs approval</option>
+                  <option>Completed</option>
+                </select>
+              </label>
+            </div>
+
+            <label>
+              Notes / requirements
+              <textarea id="notesInput" name="notes" rows="4" placeholder="Program flow, materials, budget notes, permits, point persons"></textarea>
+            </label>
+
+            <button class="primary-button" type="submit">Save Council Event</button>
+          </form>
+        </section>
+
+        <section class="upcoming-section">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Next items</p>
+              <h2>Upcoming</h2>
+            </div>
+          </div>
+          <div id="upcomingList" class="event-list"></div>
+        </section>
+      </aside>
+    </main>
+
+    <template id="eventTemplate">
+      <article class="event-item">
+        <div class="event-main">
+          <span class="event-pill"></span>
+          <h3></h3>
+          <p class="event-meta"></p>
+          <p class="event-notes"></p>
+        </div>
+        <div class="event-actions"></div>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
